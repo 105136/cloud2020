@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 @Component
-@FeignClient(value = "cloud-provider-hystrix-payment")
+@FeignClient(value = "cloud-provider-hystrix-payment",
+        fallback = PaymentFallbackService.class /*指定PaymentFallbackService的类*/)
 public interface PaymentHystrixService {
     @GetMapping(value = "/payment/hystrix/ok/{id}")
     public String paymentInfo_ok(@PathVariable("id") Integer id);

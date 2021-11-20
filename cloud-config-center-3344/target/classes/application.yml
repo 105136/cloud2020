@@ -1,0 +1,23 @@
+server:
+  port: 3344
+spring:
+  application:
+    name: cloud-config-server
+  cloud:
+    config:
+      server:
+        git:
+          #github用户名和密码
+          username: 105136
+          password: yeminhui123
+          uri: https://github.com/105136/springcloud-config.git   #GitHub上面的git仓库名字
+          search-paths:
+            - springcloud-config  #GitHub上面的项目名目录
+          force-pull: true
+      label: main     #读取分支
+
+#服务注册到eureka地址
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka

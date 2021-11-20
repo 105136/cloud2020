@@ -32,4 +32,4 @@ eureka:
     fetch-registry: true  #获取注册中心的其他服务
     #将这个服务注册进defaultZone的注册中心
     service-url:
-      defaultZone: http://eureka7001.com:7001/eureka ,http://eureka7002.com:7002/eureka
+      defaultZone: http://eureka7001.com:7001/eureka #,http://eureka7002.com:7002/eureka

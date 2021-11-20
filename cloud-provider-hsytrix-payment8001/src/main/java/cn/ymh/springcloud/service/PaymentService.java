@@ -1,6 +1,10 @@
 package cn.ymh.springcloud.service;
 
+import cn.hutool.core.util.IdUtil;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,13 +14,42 @@ public class PaymentService {
         return "线程池: " + Thread.currentThread().getName()+" paymentInfo_OK,id: "+ id+"\t"+"O(∩_∩)O哈哈~";
     }
 
+
+    @HystrixCommand(fallbackMethod = "paymentInfo_TimeOutHandle" /*用来善后的方法*/,commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "3000")
+    })      /*hystrix配置超过3秒，没返回就服务降级，调用fallback*/   /*@HystrixProperty的属性在HystrixCommandProperties上*/
     public String paymentInfo_TimeOut(Integer id){
-        int timesecond = 3;
+        int timesecond = 5;
         try {
-            TimeUnit.SECONDS.sleep(3);
+            TimeUnit.SECONDS.sleep(timesecond);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return "线程池: " + Thread.currentThread().getName()+" id: "+id+"\t"+"O(∩_∩)O哈哈~"+"耗时(秒):"+timesecond;
+    }
+
+    //用来善后fallback的方法
+    public String paymentInfo_TimeOutHandle(Integer id){
+        return "线程池" + Thread.currentThread().getName()+"  8001系统繁忙或者运行报错，请稍后再试---id:"+id+"o(╥﹏╥)o";
+    }
+
+    //===服务熔断
+    @HystrixCommand(fallbackMethod = "paymentCircuitBreaker_fallback",commandProperties = {
+            @HystrixProperty(name = "circuitBreaker.enabled",value = "true"),//是否开启断路器
+            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value = "10"),//请求次数
+            @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value = "10000"),//时间窗口
+            @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value = "60") //失败率达到多少后跳闸
+    })      /*上面的配置意思：开启断路器，在10s中之内，要是有10次请求的失败率达到60%，就跳闸。10秒之后，要是有一个请求请求正常，就慢慢恢复*/
+    public String paymentCircuitBreaker(@PathVariable("id") Integer id) {
+        if(id < 0) {
+            throw new RuntimeException("******id 不能负数");
+        }
+        String serialNumber = IdUtil.simpleUUID();
+
+        return Thread.currentThread().getName()+"\t"+"调用成功，流水号: " + serialNumber;
+    }
+
+    public String paymentCircuitBreaker_fallback(@PathVariable("id") Integer id) {
+        return "id 不能负数，请稍后再试，/(ㄒoㄒ)/~~   id: " +id;
     }
 }
