@@ -11,10 +11,11 @@ spring:
           username: 105136
           password: yeminhui123
           uri: https://github.com/105136/springcloud-config.git   #GitHub上面的git仓库名字
+          timeout: 20			# 超时时间，默认是5秒，这里随便设置
           search-paths:
             - springcloud-config  #GitHub上面的项目名目录
-          force-pull: true
-      label: main     #读取分支
+          force-pull: true  # 强制拉取覆盖
+      label: main     #git要拉取的分支
 
 #服务注册到eureka地址
 eureka:
